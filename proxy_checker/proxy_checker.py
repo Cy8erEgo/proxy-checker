@@ -1,18 +1,21 @@
 import requests
 from requests.exceptions import ProxyError, ConnectTimeout
-from pprint import pprint
 from multiprocessing import Process, Manager
 import os
 
 
-TIMEOUT = 3 
+TIMEOUT = 3
 
 
 def check_proxy(proxy: str, list_) -> None:
     print(f"[{os.getpid()}] {proxy}")
     proxy_url = f"http://{proxy}"
     try:
-        requests.get("https://httpbin.org/ip", proxies={"http": proxy_url, "https": proxy_url}, timeout=TIMEOUT)
+        requests.get(
+            "https://httpbin.org/ip",
+            proxies={"http": proxy_url, "https": proxy_url},
+            timeout=TIMEOUT,
+        )
         list_.append(proxy)
     except (ProxyError, ConnectTimeout):
         pass
