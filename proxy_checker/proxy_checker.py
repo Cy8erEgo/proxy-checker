@@ -2,6 +2,7 @@ import requests
 from requests.exceptions import ProxyError, ConnectTimeout
 from multiprocessing import Process, Manager
 import os
+import re
 
 
 TIMEOUT = 3
@@ -25,7 +26,9 @@ print("=" * 10, "CHECKING", "=" * 10)
 
 # read proxies
 with open("to_check.txt") as f:
-    proxies = [line.strip() for line in f.readlines()]
+    text = f.read()
+
+proxies = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}\:\d+", text))
 
 # check the proxies
 with Manager() as manager:
