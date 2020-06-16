@@ -1,5 +1,6 @@
-import requests
+import re
 
+import requests
 from bs4 import BeautifulSoup as bs
 
 
@@ -14,10 +15,13 @@ def parse_proxies():
     rows = soup.find_all("tr", class_="spy1xx")
     rows.extend(soup.find_all("tr", class_="spy1x"))
 
+    pattern = re.compile("(?:\d{1,3}\.){3}\d{1,3}:\d+")
     proxies = []
     
     for row in rows:
-        proxies.append(row.find("td").text.strip())
+        proxy = re.findall(pattern, row.find("td").text)
+        if proxy:
+            proxies.extend(proxy)
 
     return proxies
 
