@@ -2,26 +2,33 @@ import re
 
 import requests
 from bs4 import BeautifulSoup as bs
+from user_agent import generate_user_agent
 
 
-PROXIES_URL = "http://spys.one/"
+PROXIES_URL = "http://free-proxy.cz/ru/proxylist/country/all/https/ping/%s"
+PAGES_COUNT = 10
+HTTP_HEADERS = {"User-Agent": generate_user_agent()}
+TIMEOUT = 10
 
 
 def get_soup(url):
-    return bs(requests.get(url).text, "html.parser")
+    return bs(requests.get(url, headers=HTTP_HEADERS, timeout=TIMEOUT).text, "html.parser")
+
 
 def parse_proxies():
-    soup = get_soup(PROXIES_URL)
-    rows = soup.find_all("tr", class_="spy1xx")
-    rows.extend(soup.find_all("tr", class_="spy1x"))
-
     pattern = re.compile("(?:\d{1,3}\.){3}\d{1,3}:\d+")
     proxies = []
-    
-    for row in rows:
-        proxy = re.findall(pattern, row.find("td").text)
-        if proxy:
-            proxies.extend(proxy)
+
+    for page_num in range(1, PAGES_COUNT + 1):
+        soup = get_soup(PROXIES_URL % page_num)
+        rows = soup.find("table", id="proxy_list").findall("tr")
+        
+        for row in rows:
+            script = row.find("script").text
+            proxy = re.findall(r'Base64.decode\("(.+)"\)', script)
+
+            if proxy and re.find(pattern, proxy):
+                proxies.append(proxy)
 
     return proxies
 
