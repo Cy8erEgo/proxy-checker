@@ -1,4 +1,5 @@
 import re
+import base64
 
 import requests
 from bs4 import BeautifulSoup as bs
@@ -25,7 +26,9 @@ def parse_proxies():
         
         for row in rows:
             script = row.find("script").text
-            proxy = re.findall(r'Base64.decode\("(.+)"\)', script)
+            cipher = re.findall(r'Base64.decode\("(.+)"\)', script)[0]
+            ip = base64.b64decode(cipher)
+            proxy = ip
 
             if proxy and re.find(pattern, proxy):
                 proxies.append(proxy)
