@@ -1,11 +1,19 @@
 import requests
-from requests.exceptions import ProxyError, ConnectTimeout
+from requests.exceptions import RequestException
 from multiprocessing import Process, Manager
 import os
 import re
+import argparse
 
 
 TIMEOUT = 3
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--download", action="store_true", help="Download proxies instead of taking them from a file")
+    args = parser.parse_args()
+    return args
 
 
 def check_proxy(proxy: str, list_) -> None:
@@ -18,17 +26,26 @@ def check_proxy(proxy: str, list_) -> None:
             timeout=TIMEOUT,
         )
         list_.append(proxy)
-    except (ProxyError, ConnectTimeout):
+    except RequestException:
         pass
 
 
+# parse command line arguments 
+args = parse_args()
+
 print("=" * 10, "CHECKING", "=" * 10)
 
-# read proxies
-with open("to_check.txt") as f:
-    text = f.read()
+if args.download:
+    print("Download proxies...")
+    from parser import parse_proxies
+    proxies = parse_proxies()
+else:
+    # read proxies
+    with open("to_check.txt") as f:
+        text = f.read()
+    proxies = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}\:\d+", text))
 
-proxies = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}\:\d+", text))
+print(f"Got {len(proxies)} proxies")
 
 # check the proxies
 with Manager() as manager:
