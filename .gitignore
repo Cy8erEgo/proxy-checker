@@ -214,4 +214,6 @@ tags
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm+iml,vim,linux
 
+# Etc
 proxies.txt
+to_check.txt
