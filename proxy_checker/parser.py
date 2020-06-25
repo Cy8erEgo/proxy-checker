@@ -13,7 +13,9 @@ TIMEOUT = 10
 
 
 def get_soup(url):
-    return bs(requests.get(url, headers=HTTP_HEADERS, timeout=TIMEOUT).text, "html.parser")
+    return bs(
+        requests.get(url, headers=HTTP_HEADERS, timeout=TIMEOUT).text, "html.parser"
+    )
 
 
 def parse_proxies():
@@ -23,7 +25,7 @@ def parse_proxies():
     for page_num in range(1, PAGES_COUNT + 1):
         soup = get_soup(PROXIES_URL % page_num)
         rows = soup.find("table", id="proxy_list").findall("tr")
-        
+
         for row in rows:
             script = row.find("script").text
             cipher = re.findall(r'Base64.decode\("(.+)"\)', script)[0]

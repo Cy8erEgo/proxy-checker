@@ -11,7 +11,12 @@ TIMEOUT = 3
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--download", action="store_true", help="Download proxies instead of taking them from a file")
+    parser.add_argument(
+        "-d",
+        "--download",
+        action="store_true",
+        help="Download proxies instead of taking them from a file",
+    )
     args = parser.parse_args()
     return args
 
@@ -30,7 +35,7 @@ def check_proxy(proxy: str, list_) -> None:
         pass
 
 
-# parse command line arguments 
+# parse command line arguments
 args = parse_args()
 
 print("=" * 10, "CHECKING", "=" * 10)
@@ -38,6 +43,7 @@ print("=" * 10, "CHECKING", "=" * 10)
 if args.download:
     print("Download proxies...")
     from parser import parse_proxies
+
     proxies = parse_proxies()
 else:
     # read proxies
