@@ -17,6 +17,9 @@ def parse_args():
         action="store_true",
         help="Download proxies instead of taking them from a file",
     )
+    parser.add_argument(
+        "-c", "--country", default="all", help="Which country should proxies belong to"
+    )
     args = parser.parse_args()
     return args
 
@@ -44,7 +47,7 @@ if args.download:
     print("Download proxies...")
     from parser import parse_proxies
 
-    proxies = parse_proxies()
+    proxies = parse_proxies(country=args.country)
 else:
     # read proxies
     with open("to_check.txt") as f:

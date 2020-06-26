@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup as bs
 from user_agent import generate_user_agent
 
 
-PROXIES_URL = "http://free-proxy.cz/ru/proxylist/country/all/https/ping/%s"
+PROXIES_URL = "http://free-proxy.cz/ru/proxylist/country/%s/https/ping/%s"
 PAGES_COUNT = 10
 HTTP_HEADERS = {"User-Agent": generate_user_agent()}
 TIMEOUT = 10
@@ -18,13 +18,21 @@ def get_soup(url):
     )
 
 
-def parse_proxies():
+def parse_proxies(country="all"):
     pattern = re.compile("(?:\d{1,3}\.){3}\d{1,3}:\d+")
     proxies = []
 
     for page_num in range(1, PAGES_COUNT + 1):
-        soup = get_soup(PROXIES_URL % page_num)
-        rows = soup.find("table", id="proxy_list").findall("tr")
+        print("page:", page_num)
+        soup = get_soup(PROXIES_URL % (country.lower(), page_num))
+        table = soup.find("table", id="proxy_list")
+
+        if not table: 
+            continue
+
+        rows = table.findall("tr")
+
+        print("rows:", len(rows))
 
         for row in rows:
             script = row.find("script").text
