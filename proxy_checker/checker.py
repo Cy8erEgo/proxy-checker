@@ -4,6 +4,7 @@ from multiprocessing import Process, Manager
 import os
 import re
 import argparse
+from typing import Optional
 
 
 TIMEOUT = 3
@@ -22,6 +23,21 @@ def parse_args():
     )
     args = parser.parse_args()
     return args
+
+
+def get_proxy_country(proxy: str) -> Optional[str]:
+    proxy_url = f"http://{proxy}"
+    try:
+        r = requests.get(
+            "http://ip-api.com/json/",
+            proxies={"http": proxy_url, "https": proxy_url},
+            timeout=TIMEOUT,
+        )
+        return r.json()["countryCode"]
+    except RequestException:
+        pass
+    return None
+
 
 
 def check_proxy(proxy: str, list_) -> None:
@@ -52,7 +68,16 @@ else:
     # read proxies
     with open("to_check.txt") as f:
         text = f.read()
-    proxies = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}\:\d+", text))
+    proxies_all = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}\:\d+", text))
+
+    # filter by country
+    # TODO: refactoring
+    print("Filtering by country...")
+    proxies = []
+
+    for proxy in proxies_all:
+        if get_proxy_country(proxy) == args.country:
+            proxies.append(proxy)
 
 print(f"Got {len(proxies)} proxies")
 
