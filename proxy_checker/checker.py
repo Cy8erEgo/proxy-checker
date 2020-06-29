@@ -21,11 +21,12 @@ def parse_args():
     parser.add_argument(
         "-c", "--country", default="all", help="Which country should proxies belong to"
     )
-    args = parser.parse_args()
-    return args
+    c_args = parser.parse_args()
+    return c_args
 
 
-def get_proxy_country(proxy: str) -> Optional[str]:
+def check_proxy(proxy: str, list_) -> None:
+    print(f"[{os.getpid()}] {proxy}")
     proxy_url = f"http://{proxy}"
     try:
         r = requests.get(
@@ -33,24 +34,8 @@ def get_proxy_country(proxy: str) -> Optional[str]:
             proxies={"http": proxy_url, "https": proxy_url},
             timeout=TIMEOUT,
         )
-        return r.json()["countryCode"]
-    except RequestException:
-        pass
-    return None
-
-
-
-def check_proxy(proxy: str, list_) -> None:
-    print(f"[{os.getpid()}] {proxy}")
-    proxy_url = f"http://{proxy}"
-    try:
-        requests.get(
-            "https://httpbin.org/ip",
-            proxies={"http": proxy_url, "https": proxy_url},
-            timeout=TIMEOUT,
-        )
-        list_.append(proxy)
-    except RequestException:
+        list_.append({"proxy": proxy, "country_code": r.json()["countryCode"]})
+    except (RequestException, Exception):
         pass
 
 
@@ -70,7 +55,6 @@ else:
         text = f.read()
     proxies = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}(?:\:|\s+)\d+", text))
     proxies = [re.sub("\s+", ":", p, count=1) for p in proxies]
-    print(proxies)
 
 print(f"Got {len(proxies)} proxies")
 
@@ -89,10 +73,19 @@ with Manager() as manager:
 
     good = list(good)
 
+# filter by country
+if args.country != "all":
+    for i, proxy in enumerate(good):
+        if proxy["country_code"].lower() != args.country.lower():
+            # x = good.pop(i)
+            # print(f"pop {x}")
+            del good[i]
+
 # write the proxies
 with open("proxies.txt", "w") as f:
-    f.writelines([f"{proxy}\n" for proxy in good])
+    f.writelines([f"{proxy['proxy']} [{proxy['country_code']}]\n" for proxy in good])
 
 # output the proxies
 print("=" * 10, "PROFIT!", "=" * 10)
-print("\n".join(good))
+for i in good:
+    print(i["proxy"], i["country_code"], sep="\t") 
