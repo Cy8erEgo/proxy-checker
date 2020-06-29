@@ -68,16 +68,9 @@ else:
     # read proxies
     with open("to_check.txt") as f:
         text = f.read()
-    proxies_all = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}\:\d+", text))
-
-    # filter by country
-    # TODO: refactoring
-    print("Filtering by country...")
-    proxies = []
-
-    for proxy in proxies_all:
-        if get_proxy_country(proxy) == args.country:
-            proxies.append(proxy)
+    proxies = set(re.findall(r"(?:\d{1,3}\.){3}\d{1,3}(?:\:|\s+)\d+", text))
+    proxies = [re.sub("\s+", ":", p, count=1) for p in proxies]
+    print(proxies)
 
 print(f"Got {len(proxies)} proxies")
 
