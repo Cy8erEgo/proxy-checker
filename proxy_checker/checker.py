@@ -1,11 +1,9 @@
-import requests
-from requests.exceptions import RequestException
-from multiprocessing import Process, Manager
+import argparse
 import os
 import re
-import argparse
-from typing import Optional
-
+from multiprocessing import Process, Manager
+import requests
+from requests.exceptions import RequestException
 
 TIMEOUT = 3
 
@@ -19,7 +17,10 @@ def parse_args():
         help="Download proxies instead of taking them from a file",
     )
     parser.add_argument(
-        "-c", "--country", default="all", help="Which country should proxies belong to"
+        "-c",
+        "--country",
+        default="all",
+        help="Which country should proxies belong to",
     )
     c_args = parser.parse_args()
     return c_args
@@ -85,9 +86,14 @@ else:
 
 # write the proxies
 with open("proxies.txt", "w") as f:
-    f.writelines([f"{proxy['proxy']} [{proxy['country_code']}]\n" for proxy in filtered_proxies])
+    f.writelines(
+        [
+            f"{proxy['proxy']} [{proxy['country_code']}]\n"
+            for proxy in filtered_proxies
+        ]
+    )
 
 # output the proxies
 print("=" * 10, "PROFIT!", "=" * 10)
 for i in filtered_proxies:
-    print(i["proxy"], i["country_code"], sep="\t") 
+    print(i["proxy"], i["country_code"], sep="\t")
