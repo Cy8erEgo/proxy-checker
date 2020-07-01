@@ -74,18 +74,20 @@ with Manager() as manager:
     good = list(good)
 
 # filter by country
-if args.country != "all":
-    for i, proxy in enumerate(good):
-        if proxy["country_code"].lower() != args.country.lower():
-            # x = good.pop(i)
-            # print(f"pop {x}")
-            del good[i]
+filtered_proxies = []
+
+if args.country == "all":
+    filtered_proxies = good
+else:
+    for proxy in good:
+        if proxy["country_code"].lower() in args.country.lower().split(","):
+            filtered_proxies.append(proxy)
 
 # write the proxies
 with open("proxies.txt", "w") as f:
-    f.writelines([f"{proxy['proxy']} [{proxy['country_code']}]\n" for proxy in good])
+    f.writelines([f"{proxy['proxy']} [{proxy['country_code']}]\n" for proxy in filtered_proxies])
 
 # output the proxies
 print("=" * 10, "PROFIT!", "=" * 10)
-for i in good:
+for i in filtered_proxies:
     print(i["proxy"], i["country_code"], sep="\t") 
